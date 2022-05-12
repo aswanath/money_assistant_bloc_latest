@@ -85,35 +85,68 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
         }
       }
 
-      if(event is TransactionFieldEmpty){
-       emit(TransactionFieldEmptyState());
+      if (event is TransactionFieldEmpty) {
+        emit(TransactionFieldEmptyState());
       }
 
-      if(event is TransactionAdded){
+      if (event is TransactionAdded) {
         transactionRepository.createTransaction(event.transaction);
         createPersistentNotification();
         emit(TransactionAddedSuccess());
       }
 
-      if(event is TransactionContinue){
+      if (event is TransactionContinue) {
         transactionRepository.createTransaction(event.transaction);
         createPersistentNotification();
         emit(TransactionContinueSuccess());
       }
 
-      if(event is TransactionUpdate){
+      if (event is TransactionUpdate) {
         transactionRepository.updateTransaction(event.transaction, event.key);
         createPersistentNotification();
         emit(TransactionUpdateSuccess());
       }
-      
-      if(event is TransactionDelete){
+
+      if (event is TransactionDelete) {
         transactionRepository.deleteTransaction(event.key);
         createPersistentNotification();
         emit(TransactionUpdateSuccess());
       }
 
-
+      if (event is TransactionSearchEvent) {
+        List<Transaction> list = [];
+        if (event.popupItem == 'Monthly') {
+          list =
+              transactionRepository.monthFilterTransactionList(event.firstDate);
+        } else if (event.popupItem == 'Yearly') {
+          list =
+              transactionRepository.yearFilterTransactionList(event.firstDate);
+        } else if (event.popupItem == 'Period') {
+          list = transactionRepository.periodFilterTransactionList(
+              event.firstDate, event.secondDate!);
+        }
+        List<Transaction> newTransactionList = list.where((element) {
+          if (element.category
+              .toLowerCase()
+              .contains(event.searchString.toLowerCase())) {
+            return element.category
+                .toLowerCase()
+                .contains(event.searchString.toLowerCase());
+          } else {
+            return element.notes
+                .toLowerCase()
+                .contains(event.searchString.toLowerCase());
+          }
+        }).toList();
+        double incomeAmount =
+            transactionRepository.incomeSum(newTransactionList);
+        double expenseAmount =
+            transactionRepository.expenseSum(newTransactionList);
+        emit(TransactionFiltered(
+            list: newTransactionList,
+            incomeAmount: incomeAmount,
+            expenseAmount: expenseAmount));
+      }
     });
   }
 

@@ -42,3 +42,10 @@ class TransactionDelete extends TransactionEvent{
   TransactionDelete({required this.key});
 }
 
+class TransactionSearchEvent extends TransactionEvent{
+  final String searchString;
+  final String popupItem;
+  final DateTime firstDate;
+  final DateTime? secondDate;
+  TransactionSearchEvent({required this.searchString,required this.popupItem,required this.firstDate,this.secondDate});
+}

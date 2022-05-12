@@ -42,16 +42,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
   void initState() {
     // print("initistatsdfasdfsadfhaksdjfhksadfhj");
     changeDateCubit = ChangeDateCubit(popupMenuCubit: popupMenuCubit);
-    initialDate = DateTime.now();
-    finalDate = DateTime.now();
+    initialDate = monthYear = finalDate = DateTime.now();
     super.initState();
   }
 
-  @override
-  void dispose() {
-    // TODO: implement dispose
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -81,9 +75,10 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                 value: context.read<TransactionBloc>(),
                                 child: const AddTransactionPage(),
                               )))
-                      .then((value) => context
+                      .then((_) => context
                           .read<PopupMenuCubit>()
-                          .changePopupMenu('Monthly'));
+                          .changePopupMenu('Monthly'))
+                      .then((_) => context.read<IconCubit>().changeToNormal());
                 },
                 child: const Icon(
                   Icons.add,
@@ -95,103 +90,110 @@ class _TransactionsPageState extends State<TransactionsPage> {
             ),
             appBar: PreferredSize(
               preferredSize: Size(deviceWidth, deviceHeight * .06),
-              child: const CustomAppBar(),
+              child: CustomAppBar(
+                popupItem: popupItem,
+                firstDate: popupItem == 'Period' ? initialDate : monthYear,
+                finalDate: finalDate,
+              ),
             ),
             body: SafeArea(
               child: Column(
                 children: [
-                  CustomSizedBox(
-                    heightRatio: 0.06,
-                    widthRatio: 1,
-                    widgetChild: DecoratedBox(
-                      decoration: BoxDecoration(
-                        color: commonWhite,
-                        border: Border(
-                          bottom: BorderSide(color: secondaryPurple, width: .4),
-                        ),
-                      ),
-                      child: BlocBuilder<PopupMenuCubit, PopupMenuState>(
-                        builder: (context, state) {
-                          state as PopupMenuChange;
-                          return Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              if (state.item == 'Period') ...[
-                                Padding(
-                                  padding: const EdgeInsets.only(left: 20),
-                                  child: Row(
-                                    children: [
-                                      GestureDetector(
-                                        onTap: () {
-                                          showDatePicker(
-                                            builder: (context, child) {
-                                              return Theme(
-                                                  data: ThemeData(
-                                                      colorScheme:
+                  BlocBuilder<IconCubit,IconState>(builder: (context, state) {
+                    if(state is IconChangeNormal){
+                      return CustomSizedBox(
+                        heightRatio: 0.06,
+                        widthRatio: 1,
+                        widgetChild: DecoratedBox(
+                          decoration: BoxDecoration(
+                            color: commonWhite,
+                            border: Border(
+                              bottom: BorderSide(color: secondaryPurple, width: .4),
+                            ),
+                          ),
+                          child: BlocBuilder<PopupMenuCubit, PopupMenuState>(
+                            builder: (context, state) {
+                              state as PopupMenuChange;
+                              popupItem = state.item;
+                              return Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  if (state.item == 'Period') ...[
+                                    Padding(
+                                      padding: const EdgeInsets.only(left: 20),
+                                      child: Row(
+                                        children: [
+                                          GestureDetector(
+                                            onTap: () {
+                                              showDatePicker(
+                                                builder: (context, child) {
+                                                  return Theme(
+                                                      data: ThemeData(
+                                                          colorScheme:
                                                           ColorScheme.light(
                                                               primary:
-                                                                  secondaryPurple)),
-                                                  child: child!);
-                                            },
-                                            context: context,
-                                            initialDate: initialDate,
-                                            firstDate: DateTime(
-                                                DateTime.now().year - 10),
-                                            lastDate: DateTime.now(),
-                                          ).then(
-                                            (value) {
-                                              if (value != null) {
-                                                context
-                                                    .read<ChangeDateCubit>()
-                                                    .changeDatePeriod(
-                                                        value, finalDate, true);
-                                              }
-                                            },
-                                          );
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 2),
-                                          decoration: BoxDecoration(
-                                              border: Border.all(
-                                                color: secondaryPurple,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(5)),
-                                          child: Row(
-                                            children: [
-                                              BlocBuilder<ChangeDateCubit,
-                                                  ChangeDateState>(
-                                                builder: (context, state) {
-                                                  state as ChangeDatePeriod;
-                                                  initialDate = state.firstDate;
-                                                  finalDate = state.finalDate;
-                                                  return CustomText(
-                                                      textData:
-                                                          '${dateFormatterFull.format(state.firstDate)} ',
-                                                      textSize: 15);
+                                                              secondaryPurple)),
+                                                      child: child!);
                                                 },
+                                                context: context,
+                                                initialDate: initialDate,
+                                                firstDate: DateTime(
+                                                    DateTime.now().year - 10),
+                                                lastDate: DateTime.now(),
+                                              ).then(
+                                                    (value) {
+                                                  if (value != null) {
+                                                    context
+                                                        .read<ChangeDateCubit>()
+                                                        .changeDatePeriod(
+                                                        value, finalDate, true);
+                                                  }
+                                                },
+                                              );
+                                            },
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 2),
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                    color: secondaryPurple,
+                                                  ),
+                                                  borderRadius:
+                                                  BorderRadius.circular(5)),
+                                              child: Row(
+                                                children: [
+                                                  BlocBuilder<ChangeDateCubit,
+                                                      ChangeDateState>(
+                                                    builder: (context, state) {
+                                                      state as ChangeDatePeriod;
+                                                      initialDate = state.firstDate;
+                                                      finalDate = state.finalDate;
+                                                      return CustomText(
+                                                          textData:
+                                                          '${dateFormatterFull.format(state.firstDate)} ',
+                                                          textSize: 15);
+                                                    },
+                                                  ),
+                                                  Icon(
+                                                    Icons.calendar_today,
+                                                    size: 14,
+                                                    color: secondaryPurple,
+                                                  ),
+                                                ],
                                               ),
-                                              Icon(
-                                                Icons.calendar_today,
-                                                size: 14,
-                                                color: secondaryPurple,
-                                              ),
-                                            ],
+                                            ),
                                           ),
-                                        ),
-                                      ),
-                                      CustomText(textData: ' ~ ', textSize: 16),
-                                      GestureDetector(
-                                        onTap: () {
-                                          showDatePicker(
+                                          CustomText(textData: ' ~ ', textSize: 16),
+                                          GestureDetector(
+                                            onTap: () {
+                                              showDatePicker(
                                                   builder: (context, child) {
                                                     return Theme(
                                                         data: ThemeData(
                                                           colorScheme:
-                                                              ColorScheme.light(
-                                                                  primary:
-                                                                      secondaryPurple),
+                                                          ColorScheme.light(
+                                                              primary:
+                                                              secondaryPurple),
                                                         ),
                                                         child: child!);
                                                   },
@@ -200,199 +202,203 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                                   firstDate: DateTime(
                                                       DateTime.now().year - 10),
                                                   lastDate: DateTime.now())
-                                              .then((value) {
-                                            if (value != null) {
+                                                  .then((value) {
+                                                if (value != null) {
+                                                  context
+                                                      .read<ChangeDateCubit>()
+                                                      .changeDatePeriod(initialDate,
+                                                      value, false);
+                                                }
+                                              });
+                                            },
+                                            child: Container(
+                                              padding: const EdgeInsets.symmetric(
+                                                  horizontal: 2),
+                                              decoration: BoxDecoration(
+                                                  border: Border.all(
+                                                    color: secondaryPurple,
+                                                  ),
+                                                  borderRadius:
+                                                  BorderRadius.circular(5)),
+                                              child: Row(
+                                                children: [
+                                                  BlocBuilder<ChangeDateCubit,
+                                                      ChangeDateState>(
+                                                    builder: (context, state) {
+                                                      state as ChangeDatePeriod;
+                                                      return CustomText(
+                                                          textData:
+                                                          '${dateFormatterFull.format(state.finalDate)} ',
+                                                          textSize: 15);
+                                                    },
+                                                  ),
+                                                  Icon(
+                                                    Icons.calendar_today,
+                                                    size: 14,
+                                                    color: secondaryPurple,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ] else if (state.item == 'Yearly') ...[
+                                    Row(
+                                      children: [
+                                        const CustomSizedBox(
+                                          widthRatio: .01,
+                                        ),
+                                        IconButton(
+                                          splashRadius: 0.01,
+                                          onPressed: () {
+                                            context
+                                                .read<ChangeDateCubit>()
+                                                .decrementYear(monthYear);
+                                          },
+                                          icon: Icon(
+                                            MyFlutterApp.left_open_outline,
+                                            color: secondaryPurple,
+                                            size: 20,
+                                          ),
+                                          visualDensity:
+                                          const VisualDensity(horizontal: -4),
+                                        ),
+                                        BlocBuilder<ChangeDateCubit,
+                                            ChangeDateState>(
+                                          builder: (context, state) {
+                                            state as ChangeDateYear;
+                                            monthYear = state.dateTime;
+                                            return CustomText(
+                                                textData: monthYear.year.toString(),
+                                                textColor: commonBlack,
+                                                textSize: 16);
+                                          },
+                                        ),
+                                        IconButton(
+                                            splashRadius: .01,
+                                            onPressed: () {
                                               context
                                                   .read<ChangeDateCubit>()
-                                                  .changeDatePeriod(initialDate,
-                                                      value, false);
-                                            }
-                                          });
-                                        },
-                                        child: Container(
-                                          padding: const EdgeInsets.symmetric(
-                                              horizontal: 2),
-                                          decoration: BoxDecoration(
-                                              border: Border.all(
-                                                color: secondaryPurple,
-                                              ),
-                                              borderRadius:
-                                                  BorderRadius.circular(5)),
-                                          child: Row(
-                                            children: [
-                                              BlocBuilder<ChangeDateCubit,
-                                                  ChangeDateState>(
-                                                builder: (context, state) {
-                                                  state as ChangeDatePeriod;
-                                                  return CustomText(
-                                                      textData:
-                                                          '${dateFormatterFull.format(state.finalDate)} ',
-                                                      textSize: 15);
-                                                },
-                                              ),
-                                              Icon(
-                                                Icons.calendar_today,
-                                                size: 14,
-                                                color: secondaryPurple,
-                                              ),
-                                            ],
-                                          ),
+                                                  .incrementYear(monthYear);
+                                            },
+                                            icon: Icon(
+                                              MyFlutterApp.right_open_outline,
+                                              color: secondaryPurple,
+                                              size: 20,
+                                            ),
+                                            visualDensity: const VisualDensity(
+                                                horizontal: -4)),
+                                      ],
+                                    ),
+                                  ] else ...[
+                                    Row(
+                                      children: [
+                                        const CustomSizedBox(
+                                          widthRatio: .01,
                                         ),
+                                        IconButton(
+                                          splashRadius: 0.01,
+                                          onPressed: () {
+                                            context
+                                                .read<ChangeDateCubit>()
+                                                .decrementMonth(monthYear);
+                                          },
+                                          icon: Icon(
+                                            MyFlutterApp.left_open_outline,
+                                            color: secondaryPurple,
+                                            size: 20,
+                                          ),
+                                          visualDensity:
+                                          const VisualDensity(horizontal: -4),
+                                        ),
+                                        BlocBuilder<ChangeDateCubit,
+                                            ChangeDateState>(
+                                          builder: (context, state) {
+                                            state as ChangeDateMonth;
+                                            monthYear = state.dateTime;
+                                            return CustomText(
+                                                textData: dateFormatterMonth
+                                                    .format(monthYear),
+                                                textColor: commonBlack,
+                                                textSize: 16);
+                                          },
+                                        ),
+                                        IconButton(
+                                            splashRadius: .01,
+                                            onPressed: () {
+                                              context
+                                                  .read<ChangeDateCubit>()
+                                                  .incrementMonth(monthYear);
+                                            },
+                                            icon: Icon(
+                                              MyFlutterApp.right_open_outline,
+                                              color: secondaryPurple,
+                                              size: 20,
+                                            ),
+                                            visualDensity: const VisualDensity(
+                                                horizontal: -4)),
+                                      ],
+                                    ),
+                                  ],
+                                  PopupMenuButton(
+                                    onSelected: (val) {
+                                      if (val != null) {
+                                        context
+                                            .read<PopupMenuCubit>()
+                                            .changePopupMenu(val.toString());
+                                      }
+                                    },
+                                    child: Padding(
+                                      padding:
+                                      EdgeInsets.only(right: deviceWidth * .03),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 5),
+                                        decoration: BoxDecoration(
+                                            border:
+                                            Border.all(color: secondaryPurple),
+                                            borderRadius: BorderRadius.circular(5)),
+                                        child: Row(
+                                          children: [
+                                            CustomText(
+                                                textData: state.item, textSize: 14),
+                                            const Icon(
+                                                Icons.keyboard_arrow_down_outlined)
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                    initialValue: state.item,
+                                    itemBuilder: (context) => [
+                                      PopupMenuItem(
+                                        child: CustomText(
+                                            textData: 'Monthly', textSize: 14),
+                                        value: 'Monthly',
+                                      ),
+                                      PopupMenuItem(
+                                        child: CustomText(
+                                            textData: 'Yearly', textSize: 14),
+                                        value: 'Yearly',
+                                      ),
+                                      PopupMenuItem(
+                                        child: CustomText(
+                                            textData: 'Period', textSize: 14),
+                                        value: 'Period',
                                       ),
                                     ],
                                   ),
-                                ),
-                              ] else if (state.item == 'Yearly') ...[
-                                Row(
-                                  children: [
-                                    const CustomSizedBox(
-                                      widthRatio: .01,
-                                    ),
-                                    IconButton(
-                                      splashRadius: 0.01,
-                                      onPressed: () {
-                                        context
-                                            .read<ChangeDateCubit>()
-                                            .decrementYear(monthYear);
-                                      },
-                                      icon: Icon(
-                                        MyFlutterApp.left_open_outline,
-                                        color: secondaryPurple,
-                                        size: 20,
-                                      ),
-                                      visualDensity:
-                                          const VisualDensity(horizontal: -4),
-                                    ),
-                                    BlocBuilder<ChangeDateCubit,
-                                        ChangeDateState>(
-                                      builder: (context, state) {
-                                        state as ChangeDateYear;
-                                        monthYear = state.dateTime;
-                                        return CustomText(
-                                            textData: monthYear.year.toString(),
-                                            textColor: commonBlack,
-                                            textSize: 16);
-                                      },
-                                    ),
-                                    IconButton(
-                                        splashRadius: .01,
-                                        onPressed: () {
-                                          context
-                                              .read<ChangeDateCubit>()
-                                              .incrementYear(monthYear);
-                                        },
-                                        icon: Icon(
-                                          MyFlutterApp.right_open_outline,
-                                          color: secondaryPurple,
-                                          size: 20,
-                                        ),
-                                        visualDensity: const VisualDensity(
-                                            horizontal: -4)),
-                                  ],
-                                ),
-                              ] else ...[
-                                Row(
-                                  children: [
-                                    const CustomSizedBox(
-                                      widthRatio: .01,
-                                    ),
-                                    IconButton(
-                                      splashRadius: 0.01,
-                                      onPressed: () {
-                                        context
-                                            .read<ChangeDateCubit>()
-                                            .decrementMonth(monthYear);
-                                      },
-                                      icon: Icon(
-                                        MyFlutterApp.left_open_outline,
-                                        color: secondaryPurple,
-                                        size: 20,
-                                      ),
-                                      visualDensity:
-                                          const VisualDensity(horizontal: -4),
-                                    ),
-                                    BlocBuilder<ChangeDateCubit,
-                                        ChangeDateState>(
-                                      builder: (context, state) {
-                                        state as ChangeDateMonth;
-                                        monthYear = state.dateTime;
-                                        return CustomText(
-                                            textData: dateFormatterMonth
-                                                .format(monthYear),
-                                            textColor: commonBlack,
-                                            textSize: 16);
-                                      },
-                                    ),
-                                    IconButton(
-                                        splashRadius: .01,
-                                        onPressed: () {
-                                          context
-                                              .read<ChangeDateCubit>()
-                                              .incrementMonth(monthYear);
-                                        },
-                                        icon: Icon(
-                                          MyFlutterApp.right_open_outline,
-                                          color: secondaryPurple,
-                                          size: 20,
-                                        ),
-                                        visualDensity: const VisualDensity(
-                                            horizontal: -4)),
-                                  ],
-                                ),
-                              ],
-                              PopupMenuButton(
-                                onSelected: (val) {
-                                  if (val != null) {
-                                    context
-                                        .read<PopupMenuCubit>()
-                                        .changePopupMenu(val.toString());
-                                  }
-                                },
-                                child: Padding(
-                                  padding:
-                                      EdgeInsets.only(right: deviceWidth * .03),
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(
-                                        horizontal: 5),
-                                    decoration: BoxDecoration(
-                                        border:
-                                            Border.all(color: secondaryPurple),
-                                        borderRadius: BorderRadius.circular(5)),
-                                    child: Row(
-                                      children: [
-                                        CustomText(
-                                            textData: state.item, textSize: 14),
-                                        const Icon(
-                                            Icons.keyboard_arrow_down_outlined)
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                                initialValue: state.item,
-                                itemBuilder: (context) => [
-                                  PopupMenuItem(
-                                    child: CustomText(
-                                        textData: 'Monthly', textSize: 14),
-                                    value: 'Monthly',
-                                  ),
-                                  PopupMenuItem(
-                                    child: CustomText(
-                                        textData: 'Yearly', textSize: 14),
-                                    value: 'Yearly',
-                                  ),
-                                  PopupMenuItem(
-                                    child: CustomText(
-                                        textData: 'Period', textSize: 14),
-                                    value: 'Period',
-                                  ),
                                 ],
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                  ),
+                              );
+                            },
+                          ),
+                        ),
+                      );
+                    }else{
+                      return const SizedBox();
+                    }
+                  }),
                   Padding(
                     padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
                     child: Row(
@@ -552,9 +558,12 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                                 detailTileKey:
                                                     state.list[index]),
                                           )))
-                                  .then((value) => context
+                                  .then((_) => context
                                       .read<PopupMenuCubit>()
-                                      .changePopupMenu('Monthly'));
+                                      .changePopupMenu('Monthly'))
+                                  .then((_) => context
+                                      .read<IconCubit>()
+                                      .changeToNormal());
                             },
                             child: Padding(
                               padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
@@ -578,7 +587,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
                                               mainAxisAlignment:
                                                   MainAxisAlignment.spaceAround,
                                               children: [
-                                                Container(
+                                                SizedBox(
                                                   width: deviceWidth * .09,
                                                   height: deviceHeight * .022,
                                                   child: DecoratedBox(
@@ -716,12 +725,26 @@ class _TransactionsPageState extends State<TransactionsPage> {
 }
 
 class CustomAppBar extends StatelessWidget {
-  const CustomAppBar({Key? key}) : super(key: key);
+  final String popupItem;
+  final DateTime firstDate;
+  final DateTime finalDate;
+
+  const CustomAppBar(
+      {Key? key,
+      required this.popupItem,
+      required this.firstDate,
+      required this.finalDate})
+      : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<IconCubit, IconState>(
       builder: (context, state) {
+        // context.read<TransactionBloc>().add(
+        //     TransactionSearchEvent(
+        //         searchString: '',
+        //         popupItem: popupItem,
+        //         firstDate: firstDate,secondDate: finalDate));
         if (state is IconChangeNormal) {
           return AppBar(
             backgroundColor: commonWhite,
@@ -777,9 +800,12 @@ class CustomAppBar extends StatelessWidget {
                           alignment: Alignment.center,
                           child: TextField(
                             onChanged: (val) {
-                              // setState(() {
-                              //   searchText = val;
-                              // });
+                              context.read<TransactionBloc>().add(
+                                  TransactionSearchEvent(
+                                      searchString: val,
+                                      popupItem: popupItem,
+                                      firstDate: firstDate,
+                                      secondDate: finalDate));
                             },
                             style: const TextStyle(
                                 fontFamily: 'Poppins', fontSize: 16),
