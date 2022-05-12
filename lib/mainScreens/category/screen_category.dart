@@ -29,7 +29,6 @@ class _CategoryPageState extends State<CategoryPage>
   void initState() {
     controllerIndex = 0;
     tabController = TabController(length: 2, vsync: this);
-    context.read<CategoryBloc>().add(CategoryIncomeEvent());
     super.initState();
   }
 

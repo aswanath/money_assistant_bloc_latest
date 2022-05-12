@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:money_assistant_final/customWidgets/custom_text.dart';
+import 'package:money_assistant_final/model/model_class.dart';
 
 import '../globalUsageValues.dart';
 import '../mainScreens/category/category_bloc_logic/category_bloc.dart';
@@ -32,6 +33,7 @@ class DeleteCategoryPage extends StatelessWidget {
               ),
             ),
           );
+          return;
         }
       },
       child: AlertDialog(
@@ -55,8 +57,7 @@ class DeleteCategoryPage extends StatelessWidget {
             child: TextButton(
               onPressed: () {
                 if (keyCategory == null) {
-                  // context.read<TransactionBloc>().add(
-                  //     TransactionDeleteEvent(key: keyTransaction!));
+                  context.read<TransactionBloc>().add(TransactionDelete(key: keyTransaction!));
                   Navigator.pop(context);
                 } else {
                   context

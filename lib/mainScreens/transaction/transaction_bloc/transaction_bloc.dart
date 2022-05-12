@@ -6,6 +6,7 @@ import 'package:money_assistant_final/mainScreens/transaction/date_change_cubit/
 import 'package:money_assistant_final/services/transactions_repository.dart';
 
 import '../../../model/model_class.dart';
+import '../../../notification.dart';
 
 part 'transaction_event.dart';
 
@@ -83,6 +84,36 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
               expenseAmount: expenseAmount));
         }
       }
+
+      if(event is TransactionFieldEmpty){
+       emit(TransactionFieldEmptyState());
+      }
+
+      if(event is TransactionAdded){
+        transactionRepository.createTransaction(event.transaction);
+        createPersistentNotification();
+        emit(TransactionAddedSuccess());
+      }
+
+      if(event is TransactionContinue){
+        transactionRepository.createTransaction(event.transaction);
+        createPersistentNotification();
+        emit(TransactionContinueSuccess());
+      }
+
+      if(event is TransactionUpdate){
+        transactionRepository.updateTransaction(event.transaction, event.key);
+        createPersistentNotification();
+        emit(TransactionUpdateSuccess());
+      }
+      
+      if(event is TransactionDelete){
+        transactionRepository.deleteTransaction(event.key);
+        createPersistentNotification();
+        emit(TransactionUpdateSuccess());
+      }
+
+
     });
   }
 

@@ -75,8 +75,15 @@ class _TransactionsPageState extends State<TransactionsPage> {
                 foregroundColor: commonWhite,
                 backgroundColor: secondaryPurple,
                 onPressed: () {
-                  Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) => const AddTransactionPage()));
+                  Navigator.of(context)
+                      .push(MaterialPageRoute(
+                          builder: (_) => BlocProvider.value(
+                                value: context.read<TransactionBloc>(),
+                                child: const AddTransactionPage(),
+                              )))
+                      .then((value) => context
+                          .read<PopupMenuCubit>()
+                          .changePopupMenu('Monthly'));
                 },
                 child: const Icon(
                   Icons.add,
@@ -530,20 +537,24 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           child: Center(
                               child: CustomText(
                                   textData: 'No Transactions', textSize: 18)));
-                    } else {
-                      state as TransactionFiltered;
+                    } else if (state is TransactionFiltered) {
                       return Expanded(
                         child: ListView.builder(
                           itemCount: state.list.length,
                           itemBuilder: (context, index) => GestureDetector(
                             onTap: () {
-                              Navigator.of(context).push(
-                                MaterialPageRoute(
-                                  builder: (context) => DetailsTransactionPage(
-                                    detailTileKey: state.list[index],
-                                  ),
-                                ),
-                              );
+                              Navigator.of(context)
+                                  .push(MaterialPageRoute(
+                                      builder: (_) => BlocProvider.value(
+                                            value:
+                                                context.read<TransactionBloc>(),
+                                            child: DetailsTransactionPage(
+                                                detailTileKey:
+                                                    state.list[index]),
+                                          )))
+                                  .then((value) => context
+                                      .read<PopupMenuCubit>()
+                                      .changePopupMenu('Monthly'));
                             },
                             child: Padding(
                               padding: const EdgeInsets.fromLTRB(0, 4, 0, 4),
@@ -692,6 +703,8 @@ class _TransactionsPageState extends State<TransactionsPage> {
                           ),
                         ),
                       );
+                    } else {
+                      return const SizedBox();
                     }
                   }),
                 ],

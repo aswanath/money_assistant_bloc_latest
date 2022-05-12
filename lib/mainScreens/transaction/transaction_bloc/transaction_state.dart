@@ -11,3 +11,11 @@ class TransactionFiltered extends TransactionState {
 }
 
 class TransactionFilteredEmpty extends TransactionState{}
+
+class TransactionFieldEmptyState extends TransactionState{}
+
+class TransactionAddedSuccess extends TransactionState{}
+
+class TransactionContinueSuccess extends TransactionState{}
+
+class TransactionUpdateSuccess extends TransactionState{}
