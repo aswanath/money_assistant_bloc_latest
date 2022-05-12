@@ -6,7 +6,7 @@ import 'package:money_assistant_final/customWidgets/custom_text.dart';
 import 'package:money_assistant_final/customWidgets/sized_box_custom.dart';
 import 'package:money_assistant_final/globalUsageValues.dart';
 import 'package:money_assistant_final/main.dart';
-import 'package:money_assistant_final/mainScreens/screen_category.dart';
+import 'package:money_assistant_final/mainScreens/category/screen_category.dart';
 import 'package:money_assistant_final/model/model_class.dart';
 import 'package:money_assistant_final/subScreens/delete_confirmation_dialog.dart';
 import 'package:money_assistant_final/subScreens/show_category_list_dialog.dart';

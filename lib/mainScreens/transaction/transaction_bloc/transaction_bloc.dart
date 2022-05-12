@@ -1,0 +1,94 @@
+import 'dart:async';
+
+import 'package:bloc/bloc.dart';
+import 'package:meta/meta.dart';
+import 'package:money_assistant_final/mainScreens/transaction/date_change_cubit/change_date_cubit.dart';
+import 'package:money_assistant_final/services/transactions_repository.dart';
+
+import '../../../model/model_class.dart';
+
+part 'transaction_event.dart';
+
+part 'transaction_state.dart';
+
+class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
+  final TransactionRepository transactionRepository;
+  late StreamSubscription changeDateStream;
+  final ChangeDateCubit changeDateCubit;
+
+  TransactionBloc(
+      {required this.transactionRepository, required this.changeDateCubit})
+      : super(TransactionFiltered(
+            list: transactionRepository
+                .monthFilterTransactionList(DateTime.now()),
+            incomeAmount: transactionRepository.incomeSum(transactionRepository
+                .monthFilterTransactionList(DateTime.now())),
+            expenseAmount: transactionRepository.expenseSum(
+                transactionRepository
+                    .monthFilterTransactionList(DateTime.now())))) {
+    changeDateStream =
+        changeDateCubit.stream.asBroadcastStream().listen((state) {
+      if (state is ChangeDateMonth) {
+        add(TransactionMonthly(dateTime: state.dateTime));
+      } else if (state is ChangeDateYear) {
+        add(TransactionYearly(dateTime: state.dateTime));
+      } else if (state is ChangeDatePeriod) {
+        add(TransactionPeriod(
+            firstDate: state.firstDate, finalDate: state.finalDate));
+      }
+    });
+
+    on<TransactionEvent>((event, emit) {
+      if (event is TransactionMonthly) {
+        List<Transaction> list =
+            transactionRepository.monthFilterTransactionList(event.dateTime);
+        if (list.isEmpty) {
+          emit(TransactionFilteredEmpty());
+        } else {
+          double incomeAmount = transactionRepository.incomeSum(list);
+          double expenseAmount = transactionRepository.expenseSum(list);
+          emit(TransactionFiltered(
+              list: list,
+              incomeAmount: incomeAmount,
+              expenseAmount: expenseAmount));
+        }
+      }
+
+      if (event is TransactionYearly) {
+        List<Transaction> list =
+            transactionRepository.yearFilterTransactionList(event.dateTime);
+        if (list.isEmpty) {
+          emit(TransactionFilteredEmpty());
+        } else {
+          double incomeAmount = transactionRepository.incomeSum(list);
+          double expenseAmount = transactionRepository.expenseSum(list);
+          emit(TransactionFiltered(
+              list: list,
+              incomeAmount: incomeAmount,
+              expenseAmount: expenseAmount));
+        }
+      }
+
+      if (event is TransactionPeriod) {
+        List<Transaction> list = transactionRepository
+            .periodFilterTransactionList(event.firstDate, event.finalDate);
+        if (list.isEmpty) {
+          emit(TransactionFilteredEmpty());
+        } else {
+          double incomeAmount = transactionRepository.incomeSum(list);
+          double expenseAmount = transactionRepository.expenseSum(list);
+          emit(TransactionFiltered(
+              list: list,
+              incomeAmount: incomeAmount,
+              expenseAmount: expenseAmount));
+        }
+      }
+    });
+  }
+
+  @override
+  Future<void> close() {
+    changeDateStream.cancel();
+    return super.close();
+  }
+}

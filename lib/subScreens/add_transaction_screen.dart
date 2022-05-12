@@ -4,7 +4,7 @@ import 'package:hive/hive.dart';
 import 'package:money_assistant_final/customWidgets/custom_separator.dart';
 import 'package:money_assistant_final/globalUsageValues.dart';
 import 'package:money_assistant_final/main.dart';
-import 'package:money_assistant_final/mainScreens/screen_category.dart';
+import 'package:money_assistant_final/mainScreens/category/screen_category.dart';
 import 'package:money_assistant_final/subScreens/show_category_list_dialog.dart';
 import '../customWidgets/custom_text.dart';
 import '../customWidgets/sized_box_custom.dart';

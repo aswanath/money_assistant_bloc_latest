@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
+import 'package:money_assistant_final/services/category_repository.dart';
+import 'package:money_assistant_final/services/transactions_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'app.dart';
 import 'model/model_class.dart';
@@ -37,5 +39,5 @@ void main() async {
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
   ]);
-  runApp(const MyApp());
+  runApp( MyApp(transactionRepository: TransactionRepository(), categoryRepository: CategoryRepository(),));
 }

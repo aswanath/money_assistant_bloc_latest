@@ -13,6 +13,8 @@ Color onBoarding = Color(0xFFFF8819);
 Color commonWhite = Colors.white;
 late double deviceWidth;
 late double deviceHeight;
+int controllerIndex = 0;
+
 
 
 final DateFormat dateFormatterFull = DateFormat("dd-MM-yyyy");

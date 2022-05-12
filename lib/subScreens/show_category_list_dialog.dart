@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive_flutter/adapters.dart';
 import 'package:money_assistant_final/customWidgets/custom_separator.dart';
 import 'package:money_assistant_final/customWidgets/custom_text.dart';
 import 'package:money_assistant_final/customWidgets/sized_box_custom.dart';
 import 'package:money_assistant_final/globalUsageValues.dart';
 import 'package:money_assistant_final/main.dart';
-import 'package:money_assistant_final/mainScreens/screen_category.dart';
+import 'package:money_assistant_final/services/category_repository.dart';
 import 'package:money_assistant_final/subScreens/add_category_screen.dart';
 import '../model/model_class.dart';
 
@@ -70,8 +71,8 @@ class ShowCategoryPage extends StatelessWidget {
                   valueListenable: Hive.box<Category>(boxCat).listenable(),
                   builder: (BuildContext context, Box<Category> newBox,
                       Widget? child) {
-                    List<Category> _incomeList = checkIncome(newBox);
-                    List<Category> _expenseList = checkExpense(newBox);
+                    List<Category> _incomeList = context.read<CategoryRepository>().getCategoryIncomeList();
+                    List<Category> _expenseList = context.read<CategoryRepository>().getCategoryExpenseList();
                     return ListView.builder(
                       itemBuilder: (context, index) {
                         return GestureDetector(

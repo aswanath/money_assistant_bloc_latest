@@ -5,9 +5,11 @@ import 'package:money_assistant_final/customWidgets/custom_text.dart';
 import 'package:money_assistant_final/globalUsageValues.dart';
 import 'package:money_assistant_final/iconFont/my_flutter_app_icons.dart';
 import 'package:floating_bottom_navigation_bar/floating_bottom_navigation_bar.dart';
-import 'package:money_assistant_final/mainScreens/screen_category.dart';
+import 'package:money_assistant_final/mainScreens/category/screen_category.dart';
 import 'package:money_assistant_final/mainScreens/screen_settings.dart';
 import 'package:money_assistant_final/mainScreens/screen_statistics.dart';
+import 'package:money_assistant_final/mainScreens/transaction/date_change_cubit/change_date_cubit.dart';
+import 'package:money_assistant_final/mainScreens/transaction/popup_menu_cubit/popup_menu_cubit.dart';
 import 'package:money_assistant_final/mainScreens/transaction/screen_transactions.dart';
 import 'package:money_assistant_final/subScreens/add_category_screen.dart';
 import 'package:money_assistant_final/subScreens/add_transaction_screen.dart';
@@ -17,7 +19,7 @@ import '../notification.dart';
 import 'navigation_bar_cubit/navigation_bar_cubit.dart';
 
 class NavigationBarScreen extends StatefulWidget {
-  const NavigationBarScreen({Key? key}) : super(key: key);
+  const NavigationBarScreen({Key? key,}) : super(key: key);
 
   @override
   State<NavigationBarScreen> createState() => _NavigationBarScreenState();
@@ -25,13 +27,28 @@ class NavigationBarScreen extends StatefulWidget {
 
 class _NavigationBarScreenState extends State<NavigationBarScreen>
     with TickerProviderStateMixin {
+  // PopupMenuCubit popupMenuCubit = PopupMenuCubit();
+   List<Widget> _pageList =[];
+  _NavigationBarScreenState(){
+    // ChangeDateCubit changeDateCubit = ChangeDateCubit(popupMenuCubit: popupMenuCubit);
+      _pageList = [
+      // MultiBlocProvider(
+      //   providers: [
+      //    // BlocProvider.value(value: popupMenuCubit),
+      //    //  BlocProvider.value(value: changeDateCubit),
+      //     BlocProvider(create: (context)=> popupMenuCubit),
+      //     BlocProvider(create: (context)=> ChangeDateCubit(popupMenuCubit: popupMenuCubit)),
+      //   ],
+      //   child:
+      // ),
+        const TransactionsPage(),
+        const StatisticsPage(),
+      const CategoryPage(),
+      const SettingsPage(),
+    ];
+  }
   int indexNav = 0;
-  final List<Widget> _pageList = [
-    const TransactionsPage(),
-    const StatisticsPage(),
-    const CategoryPage(),
-    const SettingsPage(),
-  ];
+
   final PageController pageController = PageController();
 
   @override
