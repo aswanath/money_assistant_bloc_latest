@@ -14,6 +14,7 @@ import '../../globalUsageValues.dart';
 import '../../iconFont/my_flutter_app_icons.dart';
 import '../../model/model_class.dart';
 import '../../subScreens/add_transaction_screen.dart';
+import '../category/category_bloc_logic/category_bloc.dart';
 
 double? totalIncome;
 double? totalExpense;
@@ -28,19 +29,14 @@ class TransactionsPage extends StatefulWidget {
 class _TransactionsPageState extends State<TransactionsPage> {
   late DateTime monthYear;
 
-  String searchText = "";
-  String? currentDate;
-  String? lastDate;
   late DateTime finalDate;
   late DateTime initialDate;
   String popupItem = 'Monthly';
-  var transBox = Hive.box<Transaction>(boxTrans);
   final PopupMenuCubit popupMenuCubit = PopupMenuCubit();
   late ChangeDateCubit changeDateCubit;
 
   @override
   void initState() {
-    // print("initistatsdfasdfsadfhaksdjfhksadfhj");
     changeDateCubit = ChangeDateCubit(popupMenuCubit: popupMenuCubit);
     initialDate = monthYear = finalDate = DateTime.now();
     super.initState();
@@ -58,7 +54,7 @@ class _TransactionsPageState extends State<TransactionsPage> {
           BlocProvider(
               create: (context) => TransactionBloc(
                   transactionRepository: context.read<TransactionRepository>(),
-                  changeDateCubit: changeDateCubit)),
+                  changeDateCubit: changeDateCubit, categoryBloc: context.read<CategoryBloc>())),
         ],
         child: Builder(builder: (context) {
           return Scaffold(
@@ -519,25 +515,6 @@ class _TransactionsPageState extends State<TransactionsPage> {
                   ),
                   BlocBuilder<TransactionBloc, TransactionState>(
                       builder: (context, state) {
-                    // List<Transaction> filterList = popupItem == 'Period'
-                    //     ? periodFilterList(transBox)
-                    //     : (popupItem == 'Monthly'
-                    //         ? filteredLists(newBox)[0]
-                    //         : filteredLists(newBox)[1]);
-                    // List<Transaction> newTransactionList =
-                    //     filterList.where((element) {
-                    //   if (element.category
-                    //       .toLowerCase()
-                    //       .contains(searchText.toLowerCase())) {
-                    //     return element.category
-                    //         .toLowerCase()
-                    //         .contains(searchText.toLowerCase());
-                    //   } else {
-                    //     return element.notes
-                    //         .toLowerCase()
-                    //         .contains(searchText.toLowerCase());
-                    //   }
-                    // }).toList();
                     if (state is TransactionFilteredEmpty) {
                       return Expanded(
                           child: Center(
@@ -740,11 +717,6 @@ class CustomAppBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocBuilder<IconCubit, IconState>(
       builder: (context, state) {
-        // context.read<TransactionBloc>().add(
-        //     TransactionSearchEvent(
-        //         searchString: '',
-        //         popupItem: popupItem,
-        //         firstDate: firstDate,secondDate: finalDate));
         if (state is IconChangeNormal) {
           return AppBar(
             backgroundColor: commonWhite,
@@ -830,6 +802,12 @@ class CustomAppBar extends StatelessWidget {
                 splashRadius: 0.01,
                 onPressed: () {
                   context.read<IconCubit>().changeToNormal();
+                  context.read<TransactionBloc>().add(
+                      TransactionSearchEvent(
+                          searchString: '',
+                          popupItem: popupItem,
+                          firstDate: firstDate,
+                          secondDate: finalDate));
                 },
                 icon: Icon(
                   Icons.close,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:money_assistant_final/mainScreens/category/category_bloc_logic/category_bloc.dart';
+import 'package:money_assistant_final/mainScreens/settings/settings_cubit/settings_cubit.dart';
 import 'package:money_assistant_final/mainScreens/transaction/icon_cubit_logic/icon_cubit.dart';
 import 'package:money_assistant_final/model/model_class.dart';
 import 'package:money_assistant_final/services/category_repository.dart';
@@ -29,7 +30,8 @@ class MyApp extends StatelessWidget {
         providers: [
           BlocProvider(create: (context)=> NavigationBarCubit()),
           BlocProvider(create: (context)=> IconCubit()),
-          BlocProvider(create: (context)=> CategoryBloc(categoryDatabase: categoryRepository, transactionDatabase: transactionRepository))
+          BlocProvider(create: (context)=> CategoryBloc(categoryDatabase: categoryRepository, transactionDatabase: transactionRepository)),
+          BlocProvider(create: (context)=> SettingsCubit()),
         ],
         child: MaterialApp(
           theme: ThemeData(

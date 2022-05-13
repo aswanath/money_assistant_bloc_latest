@@ -19,3 +19,9 @@ class TransactionAddedSuccess extends TransactionState{}
 class TransactionContinueSuccess extends TransactionState{}
 
 class TransactionUpdateSuccess extends TransactionState{}
+
+// class TransactionBudgetSuccess extends TransactionState{
+//   final double incomeAmount;
+//   final double expenseAmount;
+//   TransactionBudgetSuccess({required this.expenseAmount,required this.incomeAmount});
+// }

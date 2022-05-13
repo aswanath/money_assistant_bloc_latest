@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:meta/meta.dart';
+import 'package:money_assistant_final/mainScreens/category/category_bloc_logic/category_bloc.dart';
 import 'package:money_assistant_final/mainScreens/transaction/date_change_cubit/change_date_cubit.dart';
 import 'package:money_assistant_final/services/transactions_repository.dart';
 
@@ -16,10 +17,13 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
   final TransactionRepository transactionRepository;
   late StreamSubscription changeDateStream;
   final ChangeDateCubit changeDateCubit;
+  late StreamSubscription categoryStream;
+  final CategoryBloc categoryBloc;
 
   TransactionBloc(
-      {required this.transactionRepository, required this.changeDateCubit})
-      : super(TransactionFiltered(
+      {required this.transactionRepository, required this.changeDateCubit,required this.categoryBloc})
+      : super(transactionRepository
+      .monthFilterTransactionList(DateTime.now()).isEmpty?TransactionFilteredEmpty():TransactionFiltered(
             list: transactionRepository
                 .monthFilterTransactionList(DateTime.now()),
             incomeAmount: transactionRepository.incomeSum(transactionRepository
@@ -36,6 +40,15 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
       } else if (state is ChangeDatePeriod) {
         add(TransactionPeriod(
             firstDate: state.firstDate, finalDate: state.finalDate));
+      }
+    });
+
+    categoryStream = categoryBloc.stream.asBroadcastStream().listen((state) {
+      print("listening");
+      if(state is CategoryClearBox){
+        add(TransactionMonthly(dateTime: DateTime.now()));
+      }else if(state is CategoryUpdateSuccess){
+        add(TransactionMonthly(dateTime: DateTime.now()));
       }
     });
 
@@ -147,12 +160,42 @@ class TransactionBloc extends Bloc<TransactionEvent, TransactionState> {
             incomeAmount: incomeAmount,
             expenseAmount: expenseAmount));
       }
+
+      if (event is TransactionFilterEvent) {
+        List<Transaction> list = [];
+        if (event.popupItem == 'Monthly') {
+          list =
+              transactionRepository.monthFilterTransactionList(event.firstDate);
+          emit(TransactionFiltered(
+              list: list,
+              incomeAmount: transactionRepository.incomeSum(list),
+              expenseAmount: transactionRepository.expenseSum(list)));
+        } else if (event.popupItem == 'Yearly') {
+          list =
+              transactionRepository.yearFilterTransactionList(event.firstDate);
+          emit(TransactionFiltered(
+              list: list,
+              incomeAmount: transactionRepository.incomeSum(list),
+              expenseAmount: transactionRepository.expenseSum(list)));
+        } else if (event.popupItem == 'Period') {
+          list = transactionRepository.periodFilterTransactionList(
+              event.firstDate, event.secondDate!);
+          emit(TransactionFiltered(
+              list: list,
+              incomeAmount: transactionRepository.incomeSum(list),
+              expenseAmount: transactionRepository.expenseSum(list)));
+        }
+      }
+
+
     });
   }
 
   @override
   Future<void> close() {
     changeDateStream.cancel();
+    categoryStream.cancel();
     return super.close();
   }
+
 }

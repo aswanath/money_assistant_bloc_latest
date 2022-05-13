@@ -3,6 +3,7 @@ import 'dart:math';
 import 'package:awesome_notifications/awesome_notifications.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:hive/hive.dart';
 import 'package:money_assistant_final/customWidgets/custom_text.dart';
 import 'package:money_assistant_final/customWidgets/settings_list.dart';
@@ -10,10 +11,12 @@ import 'package:money_assistant_final/customWidgets/sized_box_custom.dart';
 import 'package:money_assistant_final/globalUsageValues.dart';
 import 'package:flutter_switch/flutter_switch.dart';
 import 'package:money_assistant_final/main.dart';
+import 'package:money_assistant_final/mainScreens/settings/settings_cubit/settings_cubit.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../model/model_class.dart';
-import '../notification.dart';
+import '../../model/model_class.dart';
 import 'package:share_plus/share_plus.dart';
+
+import '../category/category_bloc_logic/category_bloc.dart';
 
 class SettingsPage extends StatefulWidget {
   const SettingsPage({Key? key}) : super(key: key);
@@ -23,108 +26,116 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
+  late bool isON;
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: commonWhite,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Column(
+    return BlocListener<SettingsCubit, SettingsState>(
+        listener: (context, state) {
+          if (state is NotificationPermissionRequest) {
+            requestNotificationPermission();
+          }
+        },
+        child: Scaffold(
+          backgroundColor: commonWhite,
+          body: SafeArea(
+            child: SingleChildScrollView(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Padding(
-                    padding: const EdgeInsets.all(15.0),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Row(
+                  Column(
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(15.0),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Icon(
-                              Icons.notifications_none_outlined,
-                              color: commonBlack,
+                            Row(
+                              children: [
+                                Icon(
+                                  Icons.notifications_none_outlined,
+                                  color: commonBlack,
+                                ),
+                                const CustomSizedBox(
+                                  widthRatio: .04,
+                                ),
+                                CustomText(
+                                    textData: 'Notification', textSize: 18),
+                              ],
                             ),
-                            const CustomSizedBox(
-                              widthRatio: .04,
+                            BlocBuilder<SettingsCubit, SettingsState>(
+                              builder: (context, state) {
+                                if(state is SwitchState){
+                                  isON = state.isOn;
+                                }
+                                return FlutterSwitch(
+                                  value: isON,
+                                  onToggle: (val) {
+                                    context.read<SettingsCubit>()
+                                        .toggleSwitchButton(val);
+                                  },
+                                  width: 44,
+                                  height: 22,
+                                  activeColor: secondaryPurple,
+                                  inactiveColor: commonBlack,
+                                  padding: 2.5,
+                                  toggleSize: 20,
+                                );
+                              },
                             ),
-                            CustomText(textData: 'Notification', textSize: 18),
                           ],
                         ),
-                        FlutterSwitch(
-                          value: prefs.getBool('notification')!,
-                          onToggle: (val) {
-                            if (val == false) {
-                              setState(() {
-                                AwesomeNotifications().cancelAll().then((_) =>
-                                    prefs.setBool('notification', false));
-                                AwesomeNotifications().resetGlobalBadge();
-                              });
-                            } else {
-                              setState(() {});
-                              requestNotificationPermission();
-                            }
-                          },
-                          width: 44,
-                          height: 22,
-                          activeColor: secondaryPurple,
-                          inactiveColor: commonBlack,
-                          padding: 2.5,
-                          toggleSize: 20,
-                        ),
-                      ],
+                      ),
+                      GestureDetector(
+                        child: const SettingsListItems(
+                            iconData: Icons.cleaning_services_outlined,
+                            string: 'Reset everything'),
+                        onTap: _clearEverything,
+                      ),
+                      GestureDetector(
+                        child: const SettingsListItems(
+                            iconData: Icons.share_outlined, string: 'Share'),
+                        onTap: _shareApp,
+                      ),
+                      GestureDetector(
+                        child: const SettingsListItems(
+                            iconData: Icons.rate_review_outlined,
+                            string: 'Write a review'),
+                        onTap: _launchPlaystore,
+                      ),
+                      GestureDetector(
+                          child: const SettingsListItems(
+                              iconData: Icons.feedback_outlined,
+                              string: 'Feedback'),
+                          onTap: _launchMail),
+                      GestureDetector(
+                        child: const SettingsListItems(
+                            iconData: Icons.privacy_tip_outlined,
+                            string: 'Privacy Policy'),
+                        onTap: _launchPrivacyPolicy,
+                      ),
+                      GestureDetector(
+                        child: const SettingsListItems(
+                            iconData: Icons.info_outline, string: 'About Us'),
+                        onTap: _aboutUs,
+                      ),
+                    ],
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Center(
+                      child: CustomText(
+                        textData: 'Version 1.2',
+                        textSize: 16,
+                        textColor: secondaryPurple,
+                      ),
                     ),
-                  ),
-                  GestureDetector(
-                    child: const SettingsListItems(
-                        iconData: Icons.cleaning_services_outlined,
-                        string: 'Reset everything'),
-                    onTap: _clearEverything,
-                  ),
-                  GestureDetector(
-                    child: const SettingsListItems(
-                        iconData: Icons.share_outlined, string: 'Share'),
-                    onTap: _shareApp,
-                  ),
-                  GestureDetector(
-                    child: const SettingsListItems(
-                        iconData: Icons.rate_review_outlined,
-                        string: 'Write a review'),
-                    onTap: _launchPlaystore,
-                  ),
-                  GestureDetector(
-                      child: const SettingsListItems(
-                          iconData: Icons.feedback_outlined,
-                          string: 'Feedback'),
-                      onTap: _launchMail),
-                  GestureDetector(
-                    child: const SettingsListItems(
-                        iconData: Icons.privacy_tip_outlined,
-                        string: 'Privacy Policy'),
-                    onTap: _launchPrivacyPolicy,
-                  ),
-                  GestureDetector(
-                    child: const SettingsListItems(
-                        iconData: Icons.info_outline, string: 'About Us'),
-                    onTap: _aboutUs,
-                  ),
+                  )
                 ],
               ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Center(
-                  child: CustomText(
-                    textData: 'Version 1.2',
-                    textSize: 16,
-                    textColor: secondaryPurple,
-                  ),
-                ),
-              )
-            ],
+            ),
           ),
         ),
-      ),
-    );
+      );
   }
 
   void requestNotificationPermission() {
@@ -133,60 +144,60 @@ class _SettingsPageState extends State<SettingsPage> {
         showDialog(
             context: context,
             builder: (context) {
-              return AlertDialog(
-                title: CustomText(
-                  textData: 'Allow Notifications',
-                  textSize: 20,
-                  textColor: secondaryPurple,
-                ),
-                content: CustomText(
-                  textData:
-                      'App would need access to notification to send notifications',
-                  textSize: 18,
-                  textColor: commonBlack,
-                ),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
-                    child: CustomText(
-                      textData: "Don't allow",
-                      textSize: 18,
-                      textColor: dateGrey,
-                    ),
+              return BlocListener<SettingsCubit, SettingsState>(
+                listener: (context, state) {
+                  if(state is SwitchStateTwo){
+                    context.read<SettingsCubit>().toggleSwitchButton(true);
+                    Navigator.pop(context);
+                  }
+                },
+                child: AlertDialog(
+                  title: CustomText(
+                    textData: 'Allow Notifications',
+                    textSize: 20,
+                    textColor: secondaryPurple,
                   ),
-                  TextButton(
-                    onPressed: () {
-                      prefs.setBool('notification', true);
-                      AwesomeNotifications()
-                          .requestPermissionToSendNotifications()
-                          .then((checkAllowed) {
-                        setState(() {});
+                  content: CustomText(
+                    textData:
+                    'App would need access to notification to send notifications',
+                    textSize: 18,
+                    textColor: commonBlack,
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
                         Navigator.pop(context);
-                        createPersistentNotification();
-                      });
-                    },
-                    child: CustomText(
-                      textData: 'Allow',
-                      textSize: 18,
-                      textColor: commonBlack,
+                      },
+                      child: CustomText(
+                        textData: "Don't allow",
+                        textSize: 18,
+                        textColor: dateGrey,
+                      ),
                     ),
-                  ),
-                ],
+                    TextButton(
+                      onPressed: () {
+                        context.read<SettingsCubit>().toggleSwitchButtonThree();
+                      },
+                      child: CustomText(
+                        textData: 'Allow',
+                        textSize: 18,
+                        textColor: commonBlack,
+                      ),
+                    ),
+                  ],
+                ),
               );
             });
       } else {
-        setState(() {});
-        createPersistentNotification();
-        prefs.setBool('notification', true);
+        context.read<SettingsCubit>().toggleSwitchButtonTwo();
       }
     });
   }
 
   void _launchMail() async {
     final String uri =
-        'mailto:aswanathck.ramesh@gmail.com?subject=${Uri.encodeFull('Money Assistant app feedback')}&body=${Uri.encodeFull('')}';
+        'mailto:aswanathck.ramesh@gmail.com?subject=${Uri.encodeFull(
+        'Money Assistant app feedback')}&body=${Uri.encodeFull('')}';
     await launch(uri);
   }
 
@@ -221,15 +232,15 @@ $uri''',
         return AlertDialog(
           title: Center(
               child: CustomText(
-            textData: 'About Me',
-            textSize: 20,
-            textColor: secondaryPurple,
-            textWeight: FontWeight.w600,
-          )),
+                textData: 'About Me',
+                textSize: 20,
+                textColor: secondaryPurple,
+                textWeight: FontWeight.w600,
+              )),
           content: CustomText(
             textAlignment: TextAlign.center,
             textData:
-                'I am Aswanath C K from Kerala, India. I am enthusiastic in building application. This app is developed in Flutter',
+            'I am Aswanath C K from Kerala, India. I am enthusiastic in building application. This app is developed in Flutter',
             textSize: 16,
             textColor: commonBlack,
           ),
@@ -248,7 +259,7 @@ $uri''',
         builder: (context) {
           return AlertDialog(
             contentPadding:
-                const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
+            const EdgeInsets.symmetric(horizontal: 30, vertical: 10),
             title: CustomText(
               textData: 'Making sure it is you',
               textSize: 18,
@@ -310,21 +321,20 @@ $uri''',
                               RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(7))),
                           backgroundColor:
-                              MaterialStateProperty.all(secondaryPurple),
+                          MaterialStateProperty.all(secondaryPurple),
                         ),
                       ),
                       ElevatedButton(
                         onPressed: () {
                           if (int.parse(textController.text) ==
                               first + second) {
-                            Hive.box<Transaction>(boxTrans).clear();
-                            Hive.box<Category>(boxCat).clear();
+                            context.read<CategoryBloc>().add(CategoryClearBox());
                             Navigator.pop(context);
                             ScaffoldMessenger.of(context).showSnackBar(SnackBar(
                               content: CustomText(
                                   textData: 'Reset Success', textSize: 16),
                               backgroundColor: secondaryPurple,
-                            ));
+                            ),);
                           }
                         },
                         child: CustomText(textData: 'Reset', textSize: 18),
@@ -333,7 +343,7 @@ $uri''',
                               RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(7))),
                           backgroundColor:
-                              MaterialStateProperty.all(secondaryPurple),
+                          MaterialStateProperty.all(secondaryPurple),
                         ),
                       ),
                     ],

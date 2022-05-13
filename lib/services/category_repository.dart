@@ -64,17 +64,22 @@ class CategoryRepository {
   }
 
   ///category update in transaction
-  void checkCategory(String newName, int key) {
+  void checkCategory(String newName, int key,TransactionRepository transactionRepository) {
     String _name = getCategory(key).categoryName;
-    final List<Transaction> _list = _transactionDatabase.getTransactionList();
+    print(_name);
+    print(newName);
+    final List<Transaction> _list = transactionRepository.getTransactionList();
 
     for (int i = 0; i < _list.length; i++) {
       if (_list[i].category == _name) {
-        _transactionDatabase.updateTransaction(
+        transactionRepository.updateTransaction(
             Transaction(_list[i].transactionType, _list[i].date, newName,
                 _list[i].amount, _list[i].notes),
             _list[i].key);
       }
     }
   }
+
+  ///category box clear
+  void clearCategoryBox() => categoryBox.clear();
 }

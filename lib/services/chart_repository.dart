@@ -1,7 +1,7 @@
 import 'package:money_assistant_final/services/transactions_repository.dart';
 
 import '../../model/model_class.dart';
-import '../mainScreens/screen_statistics.dart';
+import '../mainScreens/statistics/screen_statistics.dart';
 import 'category_repository.dart';
 
 class ChartRepository {

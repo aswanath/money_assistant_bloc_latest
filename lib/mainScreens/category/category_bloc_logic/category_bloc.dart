@@ -50,10 +50,10 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
             emit(CategoryUpdateSuccess());
           } else if (!categoryDatabase
               .categoryDuplicateCheck(event.newCategoryName)) {
+            categoryDatabase.checkCategory(event.newCategoryName, event.key,transactionDatabase);
             categoryDatabase.updateCategory(
                 Category(event.transactionType, event.newCategoryName),
                 event.key);
-            categoryDatabase.checkCategory(event.newCategoryName, event.key);
             emit(CategoryUpdateSuccess());
           } else {
             emit(CategoryUpdateFailure());
@@ -71,6 +71,14 @@ class CategoryBloc extends Bloc<CategoryEvent, CategoryState> {
             emit(CategoryDeleteFailure());
           }
           emit(emitCategory(_transactionType));
+        }
+
+        ///category box clear
+        if(event is CategoryClearBox){
+          categoryDatabase.clearCategoryBox();
+          transactionDatabase.transactionBoxClear();
+          emit(const CategoryIncomeState(
+              categoryList: []));
         }
       },
     );

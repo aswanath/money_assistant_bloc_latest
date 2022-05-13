@@ -49,3 +49,17 @@ class TransactionSearchEvent extends TransactionEvent{
   final DateTime? secondDate;
   TransactionSearchEvent({required this.searchString,required this.popupItem,required this.firstDate,this.secondDate});
 }
+
+// class TransactionBudgetAmount extends TransactionEvent{
+//   final String popupItem;
+//   final DateTime firstDate;
+//   final DateTime secondDate;
+//   TransactionBudgetAmount({required this.popupItem,required this.firstDate,required this.secondDate});
+// }
+
+class TransactionFilterEvent extends TransactionEvent{
+  final String popupItem;
+  final DateTime firstDate;
+  final DateTime? secondDate;
+  TransactionFilterEvent({required this.popupItem,required this.firstDate,this.secondDate});
+}

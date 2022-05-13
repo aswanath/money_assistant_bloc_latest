@@ -23,20 +23,17 @@ class CategoryExpenseState extends CategoryState {
 ///category update failure
 class CategoryUpdateFailure extends CategoryState{
   @override
-  // TODO: implement props
   List<Object?> get props => [];
 }
 
 ///category update success
 class CategoryUpdateSuccess extends CategoryState{
   @override
-  // TODO: implement props
   List<Object?> get props => [];
 }
 
 ///category delete failure
 class CategoryDeleteFailure extends CategoryState{
   @override
-  // TODO: implement props
   List<Object?> get props => [];
 }

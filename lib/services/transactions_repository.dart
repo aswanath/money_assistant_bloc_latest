@@ -102,4 +102,7 @@ class TransactionRepository {
     return check.isEmpty ? false : true;
   }
 
+  ///transaction box clear
+  void transactionBoxClear() => transactionBox.clear();
+
 }

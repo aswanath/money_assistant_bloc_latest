@@ -32,3 +32,6 @@ class CategoryDeleteEvent extends CategoryEvent{
   final int key;
   CategoryDeleteEvent({required this.key});
 }
+
+///to clear the box
+class CategoryClearBox extends CategoryEvent{}
