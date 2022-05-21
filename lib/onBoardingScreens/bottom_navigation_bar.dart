@@ -27,26 +27,17 @@ class NavigationBarScreen extends StatefulWidget {
 
 class _NavigationBarScreenState extends State<NavigationBarScreen>
     with TickerProviderStateMixin {
-  // PopupMenuCubit popupMenuCubit = PopupMenuCubit();
-   List<Widget> _pageList =[];
-  _NavigationBarScreenState(){
-    // ChangeDateCubit changeDateCubit = ChangeDateCubit(popupMenuCubit: popupMenuCubit);
-      _pageList = [
-      // MultiBlocProvider(
-      //   providers: [
-      //    // BlocProvider.value(value: popupMenuCubit),
-      //    //  BlocProvider.value(value: changeDateCubit),
-      //     BlocProvider(create: (context)=> popupMenuCubit),
-      //     BlocProvider(create: (context)=> ChangeDateCubit(popupMenuCubit: popupMenuCubit)),
-      //   ],
-      //   child:
-      // ),
-        const TransactionsPage(),
-        const StatisticsPage(),
+  List<Widget> _pageList = [];
+
+  _NavigationBarScreenState() {
+    _pageList = [
+      const TransactionsPage(),
+      const StatisticsPage(),
       const CategoryPage(),
       const SettingsPage(),
     ];
   }
+
   int indexNav = 0;
 
   final PageController pageController = PageController();
@@ -66,77 +57,85 @@ class _NavigationBarScreenState extends State<NavigationBarScreen>
 
   @override
   Widget build(BuildContext context) {
-    deviceHeight = MediaQuery.of(context).size.height;
-    deviceWidth = MediaQuery.of(context).size.width;
+    deviceHeight = MediaQuery
+        .of(context)
+        .size
+        .height;
+    deviceWidth = MediaQuery
+        .of(context)
+        .size
+        .width;
     return Scaffold(
       extendBody: true,
-      bottomNavigationBar: Container(
-        color: Colors.transparent,
-        child: BlocBuilder<NavigationBarCubit, NavigationBarState>(
-          builder: (context, state) {
-            if (state is NavigationBarChanged) {
-              indexNav = state.index;
-            }
-            return FloatingNavbar(
-                margin: EdgeInsets.fromLTRB(deviceWidth * .02, 0,
-                    deviceWidth * .02, deviceWidth * .025),
-                padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
-                borderRadius: 15,
-                backgroundColor: secondaryPurple,
-                selectedItemColor: commonWhite,
-                selectedBackgroundColor: null,
-                items: [
-                  FloatingNavbarItem(
-                    customWidget: NavBarItem(
-                      indexNav: indexNav,
-                      iconData: MyFlutterApp.book,
-                      text: 'Transactions',
-                      indexOfItem: 0,
-                    ),
-                  ),
-                  FloatingNavbarItem(
-                    customWidget: NavBarItem(
-                      indexNav: indexNav,
-                      iconData: MyFlutterApp.chart_pie,
-                      text: 'Statistics',
-                      indexOfItem: 1,
-                    ),
-                  ),
-                  FloatingNavbarItem(
-                    customWidget: NavBarItem(
-                      indexNav: indexNav,
-                      iconData: MyFlutterApp.boxes,
-                      text: 'Category',
-                      indexOfItem: 2,
-                    ),
-                  ),
-                  FloatingNavbarItem(
-                    customWidget: NavBarItem(
-                      indexNav: indexNav,
-                      iconData: MyFlutterApp.cog,
-                      text: 'Settings',
-                      indexOfItem: 3,
-                    ),
-                  ),
-                ],
-                currentIndex: indexNav,
-                onTap: (val) {
-                  pageController.animateToPage(val,
-                      duration: const Duration(milliseconds: 500),
-                      curve: Curves.decelerate);
-                });
-          },
-        ),
-      ),
       backgroundColor: commonWhite,
-      body: PageView(
-        scrollBehavior: MyBehavior(),
-        padEnds: false,
-        onPageChanged: (val) {
-          context.read<NavigationBarCubit>().changeNavigationBar(val);
-        },
-        controller: pageController,
-        children: _pageList,
+      body: Stack(
+        alignment: Alignment.bottomCenter,
+        children: [
+          PageView(
+            scrollBehavior: MyBehavior(),
+            padEnds: false,
+            onPageChanged: (val) {
+              context.read<NavigationBarCubit>().changeNavigationBar(val);
+            },
+            controller: pageController,
+            children: _pageList,
+          ),
+          BlocBuilder<NavigationBarCubit, NavigationBarState>(
+            builder: (context, state) {
+              if (state is NavigationBarChanged) {
+                indexNav = state.index;
+              }
+              return FloatingNavbar(
+                  margin: EdgeInsets.fromLTRB(deviceWidth * .02, 0,
+                      deviceWidth * .02, deviceWidth * .025),
+                  padding: const EdgeInsets.fromLTRB(10, 5, 10, 5),
+                  borderRadius: 15,
+                  backgroundColor: secondaryPurple,
+                  selectedItemColor: commonWhite,
+                  selectedBackgroundColor: null,
+                  items: [
+                    FloatingNavbarItem(
+                      customWidget: NavBarItem(
+                        indexNav: indexNav,
+                        iconData: MyFlutterApp.book,
+                        text: 'Transactions',
+                        indexOfItem: 0,
+                      ),
+                    ),
+                    FloatingNavbarItem(
+                      customWidget: NavBarItem(
+                        indexNav: indexNav,
+                        iconData: MyFlutterApp.chart_pie,
+                        text: 'Statistics',
+                        indexOfItem: 1,
+                      ),
+                    ),
+                    FloatingNavbarItem(
+                      customWidget: NavBarItem(
+                        indexNav: indexNav,
+                        iconData: MyFlutterApp.boxes,
+                        text: 'Category',
+                        indexOfItem: 2,
+                      ),
+                    ),
+                    FloatingNavbarItem(
+                      customWidget: NavBarItem(
+                        indexNav: indexNav,
+                        iconData: MyFlutterApp.cog,
+                        text: 'Settings',
+                        indexOfItem: 3,
+                      ),
+                    ),
+                  ],
+                  currentIndex: indexNav,
+                  onTap: (val) {
+                    pageController.animateToPage(val,
+                        duration: const Duration(milliseconds: 500),
+                        curve: Curves.decelerate);
+                  });
+            },
+          )
+        ],
       ),
     );
   }
@@ -148,12 +147,11 @@ class NavBarItem extends StatelessWidget {
   final String text;
   final int indexOfItem;
 
-  const NavBarItem(
-      {Key? key,
-      required this.indexNav,
-      required this.iconData,
-      required this.text,
-      required this.indexOfItem})
+  const NavBarItem({Key? key,
+    required this.indexNav,
+    required this.iconData,
+    required this.text,
+    required this.indexOfItem})
       : super(key: key);
 
   @override
